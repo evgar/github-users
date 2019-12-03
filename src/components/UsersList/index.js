@@ -1,29 +1,34 @@
-import React, { Component } from "react";
+//@flow
+import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import { userActions } from "../../store/actions";
-import PropTypes from "prop-types";
 import ListRow from "./../ListRow";
 import StyledUsersList from "./StyledUsersList";
 import InfiniteScroll from "react-infinite-scroller";
 
-class UsersList extends Component {
-    componentDidMount() {
-        const { fetchUsers } = this.props;
-        fetchUsers();
-    }
+type Props = {
+    fetchUsers: () => void,
+    fetchNewUsers: () => void,
+    users: number
+};
 
-    loadMore = () => {
-        const { fetchNewUsers, users } = this.props;
+const  UsersList = (props: Props) => {
+    useEffect(() => {
+        const { fetchUsers } = props;
+        fetchUsers();
+    })
+
+    const loadMore = () => {
+        const { fetchNewUsers, users } = props;
         const lastUserId = users[users.length - 1].id;
         fetchNewUsers(lastUserId);
     };
 
-    render() {
-        const { users } = this.props;
+        const { users } = props;
         return (
             <InfiniteScroll
                 pageStart={0}
-                loadMore={this.loadMore}
+                loadMore={loadMore}
                 loader={<div>Loading ...</div>}
                 initialLoad={false}
                 hasMore
@@ -35,7 +40,6 @@ class UsersList extends Component {
                 </StyledUsersList>
             </InfiniteScroll>
         );
-    }
 }
 
 const mapStateToProps = state => ({
@@ -51,9 +55,3 @@ export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(UsersList);
-
-UsersList.propTypes = {
-    fetchUsers: PropTypes.func.isRequired,
-    fetchNewUsers: PropTypes.func.isRequired,
-    users: PropTypes.array.isRequired
-};
